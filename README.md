@@ -1,7 +1,7 @@
 # ngs-ml
 Next Generation Sequencing and Machine Learning
 
-Using alignparse and dms_variants
+Using [alignparse](https://jbloomlab.github.io/alignparse/) and [dms_variants](https://jbloomlab.github.io/dms_variants/)
 
 ## Run Notebooks with Conda
 1. Download miniconda from https://docs.conda.io/en/latest/miniconda.html
