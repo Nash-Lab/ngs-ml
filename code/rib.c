@@ -158,7 +158,7 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
 
     if (file != NULL)
     {
-        printf ("found,barcode,aa_mutation\n");    
+        printf ("found,barcode,aa_mutation,n_aa_substitutions\n");    
         while (fgets (line, maxLineLength, file) != NULL)
         {   
 
