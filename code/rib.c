@@ -1,7 +1,7 @@
 /*
 Title:   Read Illumina Barcode
 Author:   Alexandre Schoepfer
-Version:  19th March 2021, 10:21 (GMT+1)
+Version:  19th March 2021, 10:45 (GMT+1)
 Notes:
 */
 #include <stdio.h>
@@ -69,7 +69,7 @@ unsigned short getStartingIndex (FILE* file, unsigned int maxLineLength)
             {
                 return (startingIndex - 1);
             }
-            else if (strcmp (line, "+\n") == 0)
+            else if (strcmp (line, "+\n") == 0 && startingIndex < 2)
             {
                 printf("X Error, '+' line should not be here at line %d.\n", 
                        startingIndex+1);
