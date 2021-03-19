@@ -1,7 +1,7 @@
 /*
 Title:   Read Illumina Barcode
 Author:   Alexandre Schoepfer
-Version:  17th March 2021, 21:58 (GMT+1)
+Version:  19th March 2021, 10:21 (GMT+1)
 Notes:
 */
 #include <stdio.h>
