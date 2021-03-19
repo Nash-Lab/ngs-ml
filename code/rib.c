@@ -81,7 +81,6 @@ int storeLookupTable (FILE * file, unsigned int maxLineLength,
 {
     
     char line[maxLineLength];
-    char * toks;
     rewind (file);
 
     unsigned long i = 0;
@@ -92,12 +91,27 @@ int storeLookupTable (FILE * file, unsigned int maxLineLength,
                 
         while (fgets (line, maxLineLength, file) != NULL)
         {   
-            strncpy (luts + i, line, barcodel);
-            strncpy (muts + j, line + barcodel + 1,
-                     maxLineLength - barcodel -1);
+            if ( strncmp(line + barcodel, ",", 1) == 0 )
+            {
+                strncpy (luts + i, line, barcodel);
+                strncpy (muts + j, line + barcodel + 1,
+                        maxLineLength - barcodel -1);
 
-            i += barcodel + 1;
-            j += maxLineLength - barcodel -1;
+                i += barcodel + 1;
+                j += maxLineLength - barcodel -1;
+            }
+            else
+            {
+                printf(
+                    "X Error, barcode with wrong size found in lookup table.\n"
+                    );
+                printf(
+                    "Please format the lookuptable like: '<barcode>,<rest>...'"
+                    );
+                printf("\nBarcode Size should be %d.\n", barcodel);
+                exit(1);
+            }
+            
         } 
     }
 
@@ -158,7 +172,7 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
 
     if (file != NULL)
     {
-        printf ("found,barcode,aa_mutation,n_aa_substitutions\n");    
+        printf ("tag,barcode,aa_mutation,n_aa_substitutions\n");    
         while (fgets (line, maxLineLength, file) != NULL)
         {   
 
@@ -239,6 +253,7 @@ int main (int argc, char* argv[])
             printf ("                   Default: 20\n");
             printf ("\nDocumentation: <https://github.com/Nash-Lab/ngs-ml>\n");
             exit (0);
+            break;
         }
     }
     
@@ -293,6 +308,12 @@ int main (int argc, char* argv[])
         maxDataLength++;
     }
     unsigned long startIndex = getStartingIndex (data, maxDataLength);
+    if (startIndex == 0)
+    {
+        printf ("X Error, invalid fastq file, couldn't find '+' line.");
+        exit(1);
+    }
+    
     int ps = parseSequences (data, maxDataLength, startIndex, luts, muts,
                              maxLutLength, lookupTableLength);
 
