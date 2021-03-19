@@ -65,10 +65,17 @@ unsigned short getStartingIndex (FILE* file, unsigned int maxLineLength)
         while (fgets (line, maxLineLength, file) != NULL)
         {   
 
-            if (strcmp (line, "+\n") == 0)
+            if (strcmp (line, "+\n") == 0 && startingIndex > 1)
             {
                 return (startingIndex - 1);
             }
+            else if (strcmp (line, "+\n") == 0)
+            {
+                printf("X Error, '+' line should not be here at line %d.\n", 
+                       startingIndex+1);
+                exit(1);
+            }
+            
             startingIndex++;   
         } 
     }
@@ -287,13 +294,13 @@ int main (int argc, char* argv[])
     char * luts = (char *)calloc (lookupTableLength, (barcodel + 1));
     if (luts == NULL)
     {
-        printf ("X Not enough memory for lookup table barcodes.");
+        printf ("X Error, not enough memory for lookup table barcodes.");
         exit(1);
     }
     char * muts = (char *)calloc (lookupTableLength, (maxLutLength - barcodel));
     if (muts == NULL)
     {
-        printf ("X Not enough memory for lookup table mutations.");
+        printf ("X Error, not enough memory for lookup table mutations.");
         exit(1);
     }
     storeLookupTable(lookupTable, maxLutLength, luts, muts);
