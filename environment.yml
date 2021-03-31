@@ -1,5 +1,6 @@
 name: null
 channels:
+  - anaconda
   - bioconda
   - salilab
   - conda-forge
@@ -25,10 +26,10 @@ dependencies:
   - botocore=1.20.36=pyhd3eb1b0_1
   - brotlipy=0.7.0=py37h27cfd23_1003
   - bzip2=1.0.8=h7b6447c_0
-  - ca-certificates=2021.1.19=h06a4308_1
+  - ca-certificates=2020.12.5=ha878542_0
   - cachetools=4.2.1=pyhd3eb1b0_0
   - cairo=1.16.0=hf32fb01_1
-  - certifi=2020.12.5=py37h06a4308_0
+  - certifi=2020.12.5=py37h89c1867_1
   - cffi=1.14.5=py37h261ae71_0
   - chardet=3.0.4=py37h06a4308_1003
   - configargparse=1.4=pyhd3eb1b0_0
@@ -39,6 +40,7 @@ dependencies:
   - dbus=1.13.18=hb2f20db_0
   - decorator=4.4.2=pyhd3eb1b0_0
   - defusedxml=0.7.1=pyhd3eb1b0_0
+  - descartes=1.1.0=py_4
   - docutils=0.16=py37_1
   - dropbox=10.10.0=py37h06a4308_0
   - dssp=3.0.0=hf484d3e_3
@@ -136,6 +138,7 @@ dependencies:
   - matplotlib-base=3.3.4=py37h62a2d02_0
   - minimap2=2.17=h8b12597_1
   - mistune=0.8.4=py37h14c3975_1001
+  - mizani=0.7.3=pyhd8ed1ab_0
   - multidict=5.1.0=py37h27cfd23_2
   - nbclassic=0.2.6=pyhd3eb1b0_0
   - nbclient=0.5.3=pyhd3eb1b0_0
@@ -154,12 +157,14 @@ dependencies:
   - openjpeg=2.3.0=h05c96fa_1
   - openssl=1.1.1k=h27cfd23_0
   - packaging=20.9=pyhd3eb1b0_0
+  - palettable=3.3.0=py_0
   - pandas=1.2.3=py37ha9443f7_0
   - pandoc=2.12=h06a4308_0
   - pandocfilters=1.4.3=py37h06a4308_1
   - pango=1.40.14=he7ab937_1005
   - paramiko=2.7.2=py_0
   - parso=0.7.0=pyh9f0ad1d_0
+  - patsy=0.5.1=py37_0
   - pbccs=4.2.0=1
   - pcre=8.44=he6710b0_0
   - perl=5.26.2=h14c3975_0
@@ -238,6 +243,7 @@ dependencies:
   - sniffio=1.2.0=py37h06a4308_1
   - sqlite=3.35.2=hdfb4753_0
   - sra-tools=2.10.0=pl526he1b5a44_0
+  - statsmodels=0.12.0=py37h7b6447c_0
   - terminado=0.9.3=py37h06a4308_0
   - testpath=0.4.4=pyhd3eb1b0_0
   - tk=8.6.10=hbc83047_0
@@ -288,4 +294,4 @@ dependencies:
     - ppft==1.6.6.3
     - pysam==0.16.0.1
     - regex==2020.11.13
-prefix: null
+prefix: /home/altfrank/Desktop/i/env
