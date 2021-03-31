@@ -1,7 +1,7 @@
 /*
 Title:   Read Illumina Barcode
 Author:   Alexandre Schoepfer
-Version:  19th March 2021, 10:45 (GMT+1)
+Version:  31th March 2021, 17:15 (GMT+1)
 Notes:
 */
 #include <stdio.h>
@@ -233,14 +233,64 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
     return (0);
 }
 
+int extractSequences (FILE* file, unsigned int maxLineLength,
+                    unsigned long startIndex)
+{
+    
+    unsigned int sl;
+    long sum;
+    double avg;
+    unsigned long matchIndex;
+
+    char line [maxLineLength];
+    char tempLine [maxLineLength];
+    char * tempLineP;
+    unsigned long index = startIndex;
+
+    rewind (file);
+
+    if (file != NULL)
+    {
+        printf ("barcode,quality\n");    
+        while (fgets (line, maxLineLength, file) != NULL)
+        {   
+
+            if (index % 4 == 2)
+            {
+                tempLineP = strtok (line, "\n");
+                strncpy (tempLine, tempLineP, maxLineLength);              
+            }
+            else if (index % 4 == 0)
+            {
+                sl = strlen (line);
+                sum  = 0;
+
+                for (unsigned int i = 0; i < sl; i++)
+                {
+                    sum += line [i] - 33;
+
+                }
+                avg = sum / sl;
+
+                printf ("%s,%d\n", tempLine, (int) avg);        
+            }
+            index++;
+        } 
+    }
+
+    return (0);
+}
+
 int main (int argc, char* argv[])
 {
     FILE* lookupTable;
     FILE* data;
     
+    short useLut = 0;
+
     if (argc == 1)
     {
-        printf ("Usage: program [OPTION]... <lookuptable> <fastq>\n");
+        printf ("Usage: program [OPTION]... [lookuptable] <fastq>\n");
         printf ("Try 'rib --help' for more information.\n");
         exit (1);
     }
@@ -249,7 +299,7 @@ int main (int argc, char* argv[])
     {
         if ( strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
-            printf ("Usage: program [OPTION]... <lookuptable> <fastq>\n");
+            printf ("Usage: program [OPTION]... [lookuptable] <fastq>\n");
             printf ("\n");
             printf ("  -b, --barcode    Length of barcode. Default: 15\n");
             printf ("  -h, --help       This prompt.\n");
@@ -258,12 +308,16 @@ int main (int argc, char* argv[])
             printf ("  -q, --quality    Cutoff value for the mean Phred\n");
             printf ("                   quality score of the sequence.\n");
             printf ("                   Default: 20\n");
+            printf ("  -t, --lut        Use lookup table\n");
             printf ("\nDocumentation: <https://github.com/Nash-Lab/ngs-ml>\n");
             exit (0);
-            break;
+        }
+        else if ( strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--lut") == 0 )
+        {
+            useLut = 1;
         }
     }
-    
+
     for (unsigned int i = 0; i < argc; i++)
     {
         if (strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "--barcode") == 0)
@@ -271,41 +325,20 @@ int main (int argc, char* argv[])
             sscanf (argv[i+1], "%d", & barcodel);
         }
         else if (strcmp(argv[i], "-q") == 0 ||
-                 strcmp(argv[i], "--quality") == 0)
+                strcmp(argv[i], "--quality") == 0)
         {
             sscanf (argv[i+1], "%lf", & qualityCutoff);
         }
                 else if (strcmp(argv[i], "-l") == 0 || 
-                         strcmp(argv[i], "--length") == 0)
+                        strcmp(argv[i], "--length") == 0)
         {
             sscanf (argv[i+1], "%d", & maxDataLength);
         }
-        
     }
 
-
-    lookupTable = fopen (argv[argc-2], "r");
-    data = fopen (argv[argc-1], "r");
-
-    // Lookup Table
-    unsigned int maxLutLength = getMaxLineLength (lookupTable,
-                                                  & lookupTableLength);
-  
-    char * luts = (char *)calloc (lookupTableLength, (barcodel + 1));
-    if (luts == NULL)
-    {
-        printf ("X Error, not enough memory for lookup table barcodes.");
-        exit(1);
-    }
-    char * muts = (char *)calloc (lookupTableLength, (maxLutLength - barcodel));
-    if (muts == NULL)
-    {
-        printf ("X Error, not enough memory for lookup table mutations.");
-        exit(1);
-    }
-    storeLookupTable(lookupTable, maxLutLength, luts, muts);
-  
     // Fastq file
+    data = fopen (argv[argc-1], "r");
+    
     if (maxDataLength == 0)
     {
         maxDataLength = getMaxLineLength (data, & dataLength);
@@ -320,8 +353,40 @@ int main (int argc, char* argv[])
         printf ("X Error, invalid fastq file, couldn't find '+' line.");
         exit(1);
     }
-    
-    int ps = parseSequences (data, maxDataLength, startIndex, luts, muts,
-                             maxLutLength, lookupTableLength);
+
+    // Lookup Table
+    if ( useLut == 1 )
+    {
+        lookupTable = fopen (argv[argc-2], "r");
+        
+        unsigned int maxLutLength = getMaxLineLength (lookupTable,
+                                                    & lookupTableLength);
+
+        char * luts = (char *)calloc (lookupTableLength, (barcodel + 1));
+        if (luts == NULL)
+        {
+            printf ("X Error, not enough memory for lookup table barcodes.");
+            exit(1);
+        }
+        char * muts = (char *)calloc (lookupTableLength,
+        (maxLutLength - barcodel));
+        if (muts == NULL)
+        {
+            printf ("X Error, not enough memory for lookup table mutations.");
+            exit(1);
+        }
+        storeLookupTable(lookupTable, maxLutLength, luts, muts);
+
+        fclose (lookupTable);
+        
+        int ps = parseSequences (data, maxDataLength, startIndex, luts, muts,
+        maxLutLength, lookupTableLength);
+    }
+    else
+    {
+        int es = extractSequences (data, maxDataLength, startIndex);
+    }
+
+    fclose (data);
 
 }
