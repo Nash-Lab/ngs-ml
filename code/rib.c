@@ -1,7 +1,7 @@
 /*
 Title:   Read Illumina Barcode
 Author:   Alexandre Schoepfer
-Version:  31th March 2021, 17:15 (GMT+1)
+Version:  3rd Mai 2021, 09:30 (GMT+1)
 Notes:
 */
 #include <stdio.h>
@@ -102,7 +102,7 @@ int storeLookupTable (FILE * file, unsigned int maxLineLength,
             {
                 strncpy (luts + i, line, barcodel);
                 strncpy (muts + j, line + barcodel + 1,
-                        maxLineLength - barcodel -1);
+                        maxLineLength - barcodel - 1);
 
                 i += barcodel + 1;
                 j += maxLineLength - barcodel -1;
@@ -125,40 +125,57 @@ int storeLookupTable (FILE * file, unsigned int maxLineLength,
     return (0);
 }
 
+unsigned long findMatchOld (char * line, char * luts, unsigned long lutLength)
+{
+    int cmp;
+
+    for (unsigned long i = 0; i < lutLength; i++)
+    {
+        cmp = strncmp (line, luts + (i * (barcodel + 1)), barcodel + 1);
+
+        if (cmp == 0)
+        {
+            return (i);
+        }
+    }
+
+    return (lutLength);
+    
+}
+
 unsigned long findMatch (char * line, char * luts, unsigned long lutLength)
 {
     
-    unsigned long lowerB = 0;
-    unsigned long upperB = lutLength-1;
+    long lowerB = 0;
+    long upperB = lutLength-1;
 
     int cmp;
 
     do   
     {
         cmp = strncmp (line, luts + 
-                       (( upperB + lowerB) / 2) * (barcodel + 1), barcodel);
+                       (( lowerB + upperB) / 2) * (barcodel + 1), barcodel + 1);
         
         if (cmp == 0)
         {
-            return ((( upperB + lowerB) / 2));
+            return ((( lowerB + upperB ) / 2));
         }
-        else if (upperB - lowerB == 0)
+        else if (upperB <= lowerB)
         {
             return (lutLength);
         }
         else if (cmp < 0)
         {
-            upperB = (( upperB + lowerB) / 2) - 1;
+            upperB = (( lowerB + upperB) / 2) - 1;
         }
         else if (cmp > 0)
         {
-            lowerB = (( upperB + lowerB) / 2) + 1;
+            lowerB = (( lowerB + upperB) / 2) + 1;
         }      
-    } while (lowerB < upperB);
+    } while (lowerB <= upperB);
 
     return (lutLength);
 }
-
 
 int parseSequences (FILE* file, unsigned int maxLineLength,
                     unsigned long startIndex, char * luts, char * muts,
@@ -182,7 +199,6 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
         printf ("tag,barcode,aa_mutation,n_aa_substitutions\n");    
         while (fgets (line, maxLineLength, file) != NULL)
         {   
-
             if (index % 4 == 2)
             {
                 tempLineP = strtok (line, "\n");
@@ -314,10 +330,10 @@ int main (int argc, char* argv[])
         }
         else if ( strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--lut") == 0 )
         {
-            useLut = 1;
+            useLut = i + 1;
         }
     }
-
+    
     for (unsigned int i = 0; i < argc; i++)
     {
         if (strcmp(argv[i], "-b") == 0 || strcmp(argv[i], "--barcode") == 0)
@@ -355,9 +371,9 @@ int main (int argc, char* argv[])
     }
 
     // Lookup Table
-    if ( useLut == 1 )
+    if ( useLut > 0 )
     {
-        lookupTable = fopen (argv[argc-2], "r");
+        lookupTable = fopen (argv[useLut], "r");
         
         unsigned int maxLutLength = getMaxLineLength (lookupTable,
                                                     & lookupTableLength);
@@ -378,7 +394,7 @@ int main (int argc, char* argv[])
         storeLookupTable(lookupTable, maxLutLength, luts, muts);
 
         fclose (lookupTable);
-        
+
         int ps = parseSequences (data, maxDataLength, startIndex, luts, muts,
         maxLutLength, lookupTableLength);
     }
