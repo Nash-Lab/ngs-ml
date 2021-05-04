@@ -17,4 +17,4 @@ Using [alignparse](https://jbloomlab.github.io/alignparse/) and [dms_variants](h
 1. Make sure that `g++` is installed with `g++ --version` in a a shell.
 1. In `ngs-ml/code`, type `g++ <FILE.c> -o FILE`.
 1. Change permission of the created binary file with `chmod +x <FILE>`.
-1. Run the program with `./<FILE>`.   
+1. Run the program with `./<FILE>`.
