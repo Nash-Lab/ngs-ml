@@ -1,7 +1,11 @@
 /*
 Title:   Read Illumina Barcode
 Author:   Alexandre Schoepfer
+<<<<<<< HEAD
 Version:  3rd Mai 2021, 15:30 (GMT+1)
+=======
+Version:  3rd Mai 2021, 09:30 (GMT+1)
+>>>>>>> 5b39477f4a5582d5648c0aa0cba30b5501ca5f35
 Notes:
 */
 #include <stdio.h>
