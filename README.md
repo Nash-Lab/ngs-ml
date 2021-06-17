@@ -11,12 +11,13 @@ script | input file(s) | output file(s) | comment
 `lt0_mini.ipynb` | .fastq, .gb, .yaml, genSeq | *con_lut.csv*, *var_lut.csv*, *rib_lut.csv* | Generate different look up tables
 `lut_filter_bc.ipynb` | *rib_lut.csv* | *p_rib_lut.csv* | Filter lookup table barcodes for only specific region
 `lut_stats.ipynb` | *rib_lut.csv*, (*con_lut.csv*, genSeq) | - | Visualize look up table
-`rib.c` | .fastq, (*rib_lut.csv*) | *Bin#.csv* | *Read Illumina barcodes* from file after cutadapt. Use `rib --help` for more information.
+`rib.c` | .fastq, (*p_rib_lut.csv*) | *Bin#.csv* | *Read Illumina barcodes* from file after cutadapt. Use `rib --help` for more information.
 `rib_summary.ipynb` | *Bin#.csv* | - | Summary of the RIB outputs
 `rib_collapsed_summary.ipynb` | *Bin#.csv*, c_Bin.csv | - | Summary collapsed RIB outputs
 `rib_heatmap.ipynb` | *Bin#.csv* | - | Heatmap of a RIB output
 `ill_tag1_bins.ipynb` | *Bin#.csv* | *tag1_Bin#.csv*, *Bins.csv* | Extract usable barcodes from RIB output and merges them into *Bins.csv*
-`daoiv` | _**TODO**_ | _**TODO**_ | On [Streamlit](https://share.streamlit.io/aa-schoepfer/daoiv/main/daoiv.py)
+`ill_calc_props.ipynb` | *Bins.csv* | *p_Bins.csv* | Calculate properties for all mutations.
+`daoiv` | *p_Binds.csv* | - | _**TODO**_ On [Streamlit](https://share.streamlit.io/aa-schoepfer/daoiv/main/daoiv.py), visualize results
  
 ## Run Notebooks with Conda
 1. Download miniconda from https://docs.conda.io/en/latest/miniconda.html
