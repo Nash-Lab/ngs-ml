@@ -1,9 +1,10 @@
 # ngs-ml
 Next Generation Sequencing and Machine Learning
 
-Using [alignparse](https://jbloomlab.github.io/alignparse/) and [dms_variants](https://jbloomlab.github.io/dms_variants/)
+Using [minimap2](https://github.com/lh3/minimap2) and [bbmap](https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/)
 
 ## Workflow
+#Old workflow:
 `lt0_mini.ipynb` -> `lut_filter_bc.ipynb` -> `rib` -> `ill_tag1_bins.ipynb`
 
 script | input file(s) | output file(s) | comment
@@ -18,7 +19,10 @@ script | input file(s) | output file(s) | comment
 `ill_tag1_bins.ipynb` | *Bin#.csv* | *tag1_Bin#.csv*, *Bins.csv* | Extract usable barcodes from RIB output and merges them into *Bins.csv*
 `ill_calc_props.ipynb` | *Bins.csv* | *p_Bins.csv* | Calculate properties for all mutations.
 `daoiv` | *p_Binds.csv* | - | _**TODO**_ On [Streamlit](https://share.streamlit.io/aa-schoepfer/daoiv/main/daoiv.py), visualize results
- 
+
+#New workflow
+(Pacbio) **Minimap2** -> `ppba` -> **sort** -> `mlut` -| (Illumina) **BBMap** -> `pib` -| (From `mlut` and `pib`) `rib` -> ...
+
 ## Run Notebooks with Conda
 1. Download miniconda from https://docs.conda.io/en/latest/miniconda.html
 1. Open an Anaconda Prompt and go to the ngs-ml folder (`cd <PATH>`)
@@ -31,3 +35,4 @@ script | input file(s) | output file(s) | comment
 1. In `ngs-ml/code`, type `g++ <FILE.c> -o FILE`.
 1. Change permission of the created binary file with `chmod +x <FILE>`.
 1. Run the program with `./<FILE>`.
+Note: For certain files, the `-lm` flag should be added as well, like: `gcc ppba.c -lm -o ppba`
