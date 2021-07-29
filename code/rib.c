@@ -19,6 +19,7 @@ unsigned long dataLength  = 0;
 double qualityCutoff = 20.0;
 unsigned int barcodel = 15;
 unsigned int maxDataLength = 0;
+char delim = '\t';
 
 unsigned int getMaxLineLength (FILE* file, unsigned long * length)
 {
@@ -94,12 +95,16 @@ int storeLookupTable (FILE * file, unsigned int maxLineLength,
     unsigned long j = 0;
     unsigned long k = 1;
 
+    char sdelim[2];
+    sdelim[0] = delim;
+    sdelim[1] = '\0';
+
     if (file != NULL)
     {
                 
         while (fgets (line, maxLineLength, file) != NULL)
         {   
-            if ( strncmp(line + barcodel, ",", 1) == 0 )
+            if ( strncmp(line + barcodel, sdelim, 1) == 0 )
             {
                 strncpy (luts + i, line, barcodel);
                 strncpy (muts + j, line + barcodel + 1,
@@ -198,7 +203,7 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
 
     if (file != NULL)
     {
-        printf ("tag,barcode,aa_mutation,n_aa_substitutions\n");    
+        //printf ("tag,barcode,aa_mutation,n_aa_substitutions\n");    
         while (fgets (line, maxLineLength, file) != NULL)
         {   
             if (index % 4 == 2)
@@ -210,7 +215,7 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
             {
                 if (barcodel != strlen (tempLine))
                 {
-                    printf ("%d,%s,,\n", WRONG_SIZE, tempLine);
+                    printf ("%d%c%s\n", WRONG_SIZE, delim, tempLine);
                 }
                 else
                 {
@@ -225,21 +230,22 @@ int parseSequences (FILE* file, unsigned int maxLineLength,
                     avg = sum / sl;
                     if (avg < qualityCutoff)
                     {
-                        printf ("%d,%s,,\n", LOW_QUALITY, tempLine);
+                        printf ("%d%c%s\n", LOW_QUALITY, delim, tempLine);
                     }
                     else
                     {
                         matchIndex = findMatch(tempLine, luts, lutLength);
                         if (matchIndex < lutLength)
                         {
-                            printf ("%d,%s,%s", FOUND,
+                            printf ("%d%c%s%c%s", FOUND, delim,
                                     luts + (matchIndex * (barcodel + 1)),
+                                    delim,
                                     muts + (matchIndex *
                                     (maxLutLength - barcodel - 1)));
                         }
                         else
                         {
-                            printf ("%d,%s,,\n", NOT_FOUND, tempLine);
+                            printf ("%d%c%s\n", NOT_FOUND, delim, tempLine);
                         }
                     }
                 }            
@@ -320,6 +326,7 @@ int main (int argc, char* argv[])
             printf ("Usage: program [OPTION]... [lookuptable] <fastq>\n");
             printf ("\n");
             printf ("  -b, --barcode    Length of barcode. Default: 15\n");
+            printf ("  -d, --delimiter  Tag delimiter. Default: '\\t'\n");
             printf ("  -h, --help       This prompt.\n");
             printf ("  -l, --length     Length of longest line in fastq file.");
             printf ("\n                   Default: automatic\n");
@@ -343,14 +350,19 @@ int main (int argc, char* argv[])
             sscanf (argv[i+1], "%d", & barcodel);
         }
         else if (strcmp(argv[i], "-q") == 0 ||
-                strcmp(argv[i], "--quality") == 0)
+            strcmp(argv[i], "--quality") == 0)
         {
             sscanf (argv[i+1], "%lf", & qualityCutoff);
         }
-                else if (strcmp(argv[i], "-l") == 0 || 
-                        strcmp(argv[i], "--length") == 0)
+        else if (strcmp(argv[i], "-l") == 0 || 
+            strcmp(argv[i], "--length") == 0)
         {
             sscanf (argv[i+1], "%d", & maxDataLength);
+        }
+        else if (strcmp(argv[i], "-d") == 0 || 
+            strcmp(argv[i], "--delimiter") == 0)
+        {
+            sscanf (argv[i+1], "%c", & delim);
         }
     }
 

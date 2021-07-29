@@ -17,13 +17,17 @@ Notes:  - TODO: memory allocation checks
 #define NCHAR 512
 #define BALIN 1024
 
-#define INDCOL 3
-#define SEQCOL 9
-#define QALCOL 10
-#define ALICOL 20
+#define INDCOL 3 // Index column location
+#define CIGCOL 5 // Cigar string column location
+#define SEQCOL 9 // Base sequence column location in .sam
+#define QALCOL 10 // Sequence quality column location in .sam
+#define ALICOL 20 // Obsolete
 
 #define START 600
 #define END 2102
+
+size_t s = 1;
+size_t e = 1;
 
 int readLine (FILE *fl, char **ref)
 {
@@ -125,7 +129,7 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
     char bcd = 0;
     char rcd[] = "000";
     char qcd[] = "000";
-    long icd[3];
+    long icd[] = {0,0,0};
     long iaa = 0;
     for (size_t i = 0; i < 3; i++) icd[i] = 0;
 
@@ -137,6 +141,8 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
     size_t aai = 0;
     size_t nki = 0;
     size_t fri = 0;
+
+    size_t naa = 0;
 
     strcpy (lts, "");
     strcpy (tmp, "");
@@ -237,17 +243,17 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
             
             for (size_t i = 0; i < 3; i++)
             {
-                if (icd[i] != 0) ics = icd[i] - i - 1;
-            }
-            
-            for (size_t i = 0; i < 3; i++)
-            {
-                if (rcd[i] == '0') rcd[i] = ref[ics+i];
+                if (icd[i] != 0) ics = icd[i] - i;
             }
 
             for (size_t i = 0; i < 3; i++)
             {
-                if (qcd[i] == '0') qcd[i] = ref[ics+i];
+                if (rcd[i] == '0') rcd[i] = ref[ics+i-1];
+            }
+
+            for (size_t i = 0; i < 3; i++)
+            {
+                if (qcd[i] == '0') qcd[i] = ref[ics+i-1];
             }
             
             sprintf (lts, "%s%ld%s ", rcd, ics, qcd);
@@ -268,6 +274,8 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
 
             strcpy (rcd, "000");
             strcpy (qcd, "000");
+            for (size_t i = 0; i < 3; i++) icd[i] = 0;
+            
 
             bcd = 0;
         }
@@ -317,9 +325,14 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
 
     for (size_t i = 0; barcodeSeq[i]!='\0'; i++) barcodeSeq[i] = toupper (barcodeSeq[i]);
     
+    for (size_t i = 0; aaStr[i]!='\0'; i++)
+    {
+        if (aaStr[i] == ' ') naa++;
+    }
+    
     
     //printf ("%.4lf,%.4lf,%.4lf\n", barqal,genqal,seqqal);
-    printf ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%.4lf\t%.4lf\t%.4lf\n", barcodeSeq, barcodeQal, genMutsSeq, genMutsQal, genIndlSeq, genIndlQal, cdStr, aaStr, nkStr, frStr, barqal, genqal, seqqal);
+    printf ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%ld\t%s\t%s\t%.4lf\t%.4lf\t%.4lf\n", barcodeSeq, barcodeQal, genMutsSeq, genMutsQal, genIndlSeq, genIndlQal, cdStr, aaStr, naa, nkStr, frStr, barqal, genqal, seqqal);
     //printf ("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", barcodeSeq, barcodeQal, genMutsSeq, genMutsQal, genIndlSeq, genIndlQal, cdStr, aaStr, nkStr);
     
     free (barcodeSeq);
@@ -337,7 +350,6 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
     free (nkStr);
     free (frStr);
 
-    
     return 0;
 }
 
@@ -357,16 +369,16 @@ int parseSam (char *ref, char **sam)
     while (tkp != NULL)
     {
 
-        if (toki == 3)
+        if (toki == INDCOL)
         {
             sscanf (tkp, "%ld", &ind); //Use atoi ?
         }
-        if (toki == 5)
+        if (toki == CIGCOL)
         {
             sscanf (tkp, "%ld%c", &cig, &stc); //Use atoi ?
         }
-        if (toki == 9) allocSam (&seq, tkp, BCHAR);                      
-        else if (toki == 10) allocSam (&qal, tkp, BCHAR);
+        if (toki == SEQCOL) allocSam (&seq, tkp, BCHAR);                      
+        else if (toki == QALCOL) allocSam (&qal, tkp, BCHAR);
         else if (strncmp (tkp,"cs:Z:", 5) == 0) allocSam (&ali, tkp, BCHAR);
 
         tkp = strtok (NULL, "\t\n");

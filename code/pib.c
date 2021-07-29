@@ -14,6 +14,10 @@ Notes:      For Saccharomyces Cerevisiae
 
 #define BCLEN 15
 
+#define CIGCOL 5
+#define ILLCOL 9
+#define IQLCOL 10 
+
 int readLine (FILE *fl, char **lin)
 {
     char c;
@@ -129,9 +133,9 @@ int parseIll (char **ill)
     while (tkp != NULL)
     {
 
-        if (toki == 5) allocIll (&cigar, tkp, BCHAR);
-        if (toki == 9) allocIll (&illum, tkp, BCHAR);
-        if (toki == 10) allocIll (&quali, tkp, BCHAR);                      
+        if (toki == CIGCOL) allocIll (&cigar, tkp, BCHAR);
+        if (toki == ILLCOL) allocIll (&illum, tkp, BCHAR);
+        if (toki == IQLCOL) allocIll (&quali, tkp, BCHAR);                      
 
         tkp = strtok (NULL, "\t\n");
         toki++;

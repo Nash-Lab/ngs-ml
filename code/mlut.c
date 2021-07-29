@@ -3,6 +3,7 @@ Title:      create nice look up table
 Author:     Alexandre Schoepfer
 Version:    28th July 2021, 10:15 (GMT+1)
 Notes:      For Saccharomyces Cerevisiae
+            TODO: inherite all tags from input .tsv
 */
 
 #include <stdio.h>
@@ -13,6 +14,10 @@ Notes:      For Saccharomyces Cerevisiae
 #define NCHAR 512
 
 #define BCLEN 15
+
+#define BARCOL 0
+#define BQLCOL 1
+#define MUTCOL 7
 
 int readLine (FILE *fl, char **lin)
 {
@@ -63,7 +68,7 @@ int allocLut (char **tok, char *str, size_t bs)
     return 0;
 }
 
-int curateLut(char *olut, char *barcd, char *barql, char *aamut, char **obarcd, char **obarql, char **oaamut, long *sbc)
+int curateLut(char *blut, char **olut, char *barcd, char *barql, char *aamut, char **obarcd, char **obarql, char **oaamut, long *sbc)
 {
     
     
@@ -80,34 +85,7 @@ int curateLut(char *olut, char *barcd, char *barql, char *aamut, char **obarcd, 
             strncpy (&tmp, *obarql+i, 1);
             ophret += tmp; 
         }
- 
-        /*
-        if (strcmp (barcd, *obarcd) == 0 && strcmp (aamut, *oaamut) != 0)
-        {
-            *sbc = -1;
-            printf ("Oh no... %s -> %s,%s\n", barcd, *oaamut, aamut);
-            strcpy (*obarcd, barcd); 
-            strcpy (*obarql, barql);
-            strcpy (*oaamut, aamut);  
-            return 1;
-
-        }
-        else
-        {
-            if (*sbc != 0)
-            {
-                if (phret > ophret) printf ("%s,%s\n", barcd, aamut);
-                else printf ("%s,%s\n", *obarcd, *oaamut);
-                *sbc = 0;  
-            }
-            else printf ("%s,%s\n", barcd, aamut);
-
-            strcpy (*obarcd, barcd); 
-            strcpy (*obarql, barql);
-            strcpy (*oaamut, aamut);  
-        }
-        */
-        
+         
         if (strcmp (barcd, *obarcd) == 0){
             if (strcmp (aamut, *oaamut) == 0 && *sbc > 0)
             {
@@ -122,7 +100,8 @@ int curateLut(char *olut, char *barcd, char *barql, char *aamut, char **obarcd, 
         {
             if (*sbc > 0)
             {
-                printf ("%s,%s,%ld\n", *obarcd, *oaamut, *sbc);
+                //printf ("%s,%s,%ld\n", *obarcd, *oaamut, *sbc);
+                printf ("%s\t%ld\n", *olut, *sbc);
             }
             *sbc = 1;
         }
@@ -130,13 +109,15 @@ int curateLut(char *olut, char *barcd, char *barql, char *aamut, char **obarcd, 
         strcpy (*obarcd, barcd); 
         strcpy (*obarql, barql);
         strcpy (*oaamut, aamut);  
+
+        strcpy (*olut, blut);
         
     }
 
     return 0;
 }
 
-int parseLut (char **lut, char *olut, char **obarcd, char **obarql, char **oaamut, long *sbc)
+int parseLut (char *lut, char *blut, char **olut, char **obarcd, char **obarql, char **oaamut, long *sbc)
 {
     char *tkp;
     char *barcd = (char *)malloc(BCHAR);
@@ -144,20 +125,20 @@ int parseLut (char **lut, char *olut, char **obarcd, char **obarql, char **oaamu
     char *aamut = (char *)malloc(BCHAR);
     size_t toki = 0;
 
-    tkp = strtok (*lut, "\t\n");
+    tkp = strtok (lut, "\t\n");
 
     while (tkp != NULL)
     {
 
-        if (toki == 0) allocLut (&barcd, tkp, BCHAR);                      
-        else if (toki == 1) allocLut (&barql, tkp, BCHAR);
-        else if (toki == 7) allocLut (&aamut, tkp, BCHAR);
+        if (toki == BARCOL) allocLut (&barcd, tkp, BCHAR);                      
+        else if (toki == BQLCOL) allocLut (&barql, tkp, BCHAR);
+        else if (toki == MUTCOL) allocLut (&aamut, tkp, BCHAR);
     
         tkp = strtok (NULL, "\t\n");
         toki++;
     }
     
-    curateLut(olut, barcd, barql, aamut, obarcd, obarql, oaamut, sbc);
+    curateLut(blut, olut, barcd, barql, aamut, obarcd, obarql, oaamut, sbc);
 
     free (barcd);
     free (barql);
@@ -176,24 +157,31 @@ int readLut (FILE *lutF, char **lut)
     strcpy (obarcd, " ");
     strcpy (obarql, "               ");
 
-    //char *olut = (char *)malloc (BCHAR*2);
-    //strcpy (olut, " ");
-    char olut[] = "";
+    char *olut = (char *)malloc (BCHAR*2);
+    strcpy (olut, " ");
+
+    char *blut = (char *)malloc (BCHAR*2);
+    strcpy (blut, " ");
 
     while (!(readLine (lutF, lut)))
-    {  
-        parseLut (lut, olut, &obarcd, &obarql, &oaamut, &sbc);
-
-        //olut = *lut;
+    {          
+        strcpy (blut, *lut);
+        blut[strlen (blut)-2] = '\0';
+        
+        parseLut (*lut, blut, &olut, &obarcd, &obarql, &oaamut, &sbc);
 
         free (*lut);
         *lut = NULL;
     }
-    if (sbc !=0) printf ("%s,%s,%ld\n", obarcd, oaamut, sbc);
+    //if (sbc !=0) printf ("%s,%s,%ld\n", obarcd, oaamut, sbc);
+    if (sbc !=0) printf ("%s\t%ld\n", olut, sbc);
     
     free (oaamut);
     free (obarcd);
     free (obarql);
+
+    free (olut);
+    free (blut);
     
     return 0;
 }
