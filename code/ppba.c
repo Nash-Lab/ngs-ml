@@ -327,7 +327,8 @@ int parseCS (char *ref, long ind, long cig, char *seq, char *qal, char *ali)
     
     for (size_t i = 0; aaStr[i]!='\0'; i++)
     {
-        if (aaStr[i] == ' ') naa++;
+        if (strlen (aaStr) == 1) naa = 0;
+        else if (aaStr[i] == ' ') naa++;
     }
     
     
