@@ -11,10 +11,10 @@ Using [minimap2](https://github.com/lh3/minimap2) and [bbmap](https://jgi.doe.go
 
 ## Workflow
 
-# Summary
+### Summary
 (Pacbio) **Minimap2** -> `ppba` -> **sort** -> `mlut` -| (Illumina) **BBMap** -> `pib` -| (From `mlut` and `pib`) `rib` -> **grep** ^1 -> **sort** -> **uniq** -c -> **sed** -E 's/^ *//; s/ /\t/' -|
 
-# Found in this repository
+### Found in this repository
 script | input file(s) | output file(s) | comment
 --- | --- | --- | ---
 `ppba.c` | *aln.sam*, *ref.fa* | prepre_lut.tsv | Extract barcode, coressponding mutation(s) and other properties from Minimap2 alignment file.
@@ -28,7 +28,7 @@ script | input file(s) | output file(s) | comment
 `ill_tag1_bins.ipynb` | *t1sct_Bin#.tsv* | *Bins.tsv* | Merges all ouputs from RIB into *Bins.tsv*
 `ill_calc_props.ipynb` | *Bins.tsv* | *p_Bins.tsv* | Calculate properties for all mutations.
 
-# Typical procedure
+### Typical procedure
 ```bash
 # Pacbio to look up table
 minimap2 --cs -ax map-hifi ref.fa pacbio.fq > aln.sam

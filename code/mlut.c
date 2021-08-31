@@ -1,9 +1,8 @@
 /*
 Title:      create nice look up table
 Author:     Alexandre Schoepfer
-Version:    28th July 2021, 10:15 (GMT+1)
+Version:    31st August 2021, 15:45 (GMT+1)
 Notes:      For Saccharomyces Cerevisiae
-            TODO: inherite all tags from input .tsv
 */
 
 #include <stdio.h>
@@ -18,6 +17,8 @@ Notes:      For Saccharomyces Cerevisiae
 #define BARCOL 0
 #define BQLCOL 1
 #define MUTCOL 7
+
+
 
 int readLine (FILE *fl, char **lin)
 {
@@ -72,9 +73,9 @@ int curateLut(char *blut, char **olut, char *barcd, char *barql, char *aamut, ch
 {
     
     
-    long phret = 0;
-    long ophret = 0;
-    char tmp;
+    long phret = 0; // barcode phret score
+    long ophret = 0; // old barcode phret score
+    char tmp; // temporary char
 
     if (strlen (barcd) == BCLEN)
     {
@@ -82,12 +83,12 @@ int curateLut(char *blut, char **olut, char *barcd, char *barql, char *aamut, ch
         for (size_t i = 0; i < BCLEN; i++) phret += barql[i];
         for (size_t i = 0; i < BCLEN; i++)
         {
-            strncpy (&tmp, *obarql+i, 1);
+            strncpy (&tmp, *obarql+i, 1); // Did not work otherwise
             ophret += tmp; 
         }
          
         if (strcmp (barcd, *obarcd) == 0){
-            if (strcmp (aamut, *oaamut) == 0 && *sbc > 0)
+            if (*sbc > 0 && strcmp (aamut, *oaamut) == 0)
             {
                 *sbc += 1;
             }
@@ -106,12 +107,15 @@ int curateLut(char *blut, char **olut, char *barcd, char *barql, char *aamut, ch
             *sbc = 1;
         }
 
-        strcpy (*obarcd, barcd); 
-        strcpy (*obarql, barql);
-        strcpy (*oaamut, aamut);  
+        if ( ! ( strcmp ( barcd, *obarcd) == 0 && phret < ophret ) )
+        {
+            strcpy (*obarcd, barcd); 
+            strcpy (*obarql, barql);
+            strcpy (*oaamut, aamut);  
 
-        strcpy (*olut, blut);
-        
+            strcpy (*olut, blut);
+        }
+
     }
 
     return 0;
@@ -119,11 +123,11 @@ int curateLut(char *blut, char **olut, char *barcd, char *barql, char *aamut, ch
 
 int parseLut (char *lut, char *blut, char **olut, char **obarcd, char **obarql, char **oaamut, long *sbc)
 {
-    char *tkp;
-    char *barcd = (char *)malloc(BCHAR);
-    char *barql = (char *)malloc(BCHAR);
-    char *aamut = (char *)malloc(BCHAR);
-    size_t toki = 0;
+    char *tkp; // current token of lut line
+    char *barcd = (char *)malloc(BCHAR); // barcode string
+    char *barql = (char *)malloc(BCHAR); // barcode quality
+    char *aamut = (char *)malloc(BCHAR); // amino acid mutation
+    size_t toki = 0; // token counter
 
     tkp = strtok (lut, "\t\n");
 
@@ -149,18 +153,18 @@ int parseLut (char *lut, char *blut, char **olut, char **obarcd, char **obarql, 
 
 int readLut (FILE *lutF, char **lut)
 {
-    long sbc = 0;
-    char *oaamut = (char *)malloc(BCHAR);
-    char *obarcd = (char *)malloc(BCHAR);
-    char *obarql = (char *)malloc(BCHAR);
+    long sbc = 0; // barocde multiplicate counter
+    char *oaamut = (char *)malloc(BCHAR); // old amino acid mutation
+    char *obarcd = (char *)malloc(BCHAR); // old barcode string
+    char *obarql = (char *)malloc(BCHAR); // old barcode quality
     strcpy (oaamut, " ");
     strcpy (obarcd, " ");
     strcpy (obarql, "               ");
 
-    char *olut = (char *)malloc (BCHAR*2);
+    char *olut = (char *)malloc (BCHAR*2); // old lut
     strcpy (olut, " ");
 
-    char *blut = (char *)malloc (BCHAR*2);
+    char *blut = (char *)malloc (BCHAR*2); // unmodified lut
     strcpy (blut, " ");
 
     while (!(readLine (lutF, lut)))
@@ -195,7 +199,7 @@ int main (int argc, char *argv[])
 
     if (argc == 1)
     {
-        printf ("Usage: program <raw_lookup_table.csv\n");
+        printf ("Usage: program <raw_lookup_table.tsv>\n");
         printf ("Try 'mlut --help' for more information.\n");
         exit (1);
     }
@@ -204,7 +208,9 @@ int main (int argc, char *argv[])
     {
         if ( strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
         {
-            printf ("Usage: program <raw_lookup_table.csv\n");
+            printf ("Usage: program <raw_lookup_table.tsv>\n");
+            printf ("Only use for .tsv files.\n");
+            printf ("Barcode length default: 15\n");
             printf ("\nDocumentation: <https://github.com/Nash-Lab/ngs-ml>\n");
             exit (0);
         }
